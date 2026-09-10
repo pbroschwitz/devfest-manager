@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, model } from '@angular/core';
 
 @Component({
   selector: 'app-search-bar',
@@ -14,4 +14,5 @@ import { Component } from '@angular/core';
 })
 export class SearchBar {
   // TODO add model
+  query = model('');
 }
