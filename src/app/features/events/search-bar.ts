@@ -7,6 +7,7 @@ import { Component, model } from '@angular/core';
       <input
         placeholder="Search events..."
         class="w-full p-4 pl-12 rounded-lg border border-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+        (input)="query.set($event.target.value)"
       />
       <span class="absolute left-4 top-4 text-gray-400">🔍</span>
     </div>

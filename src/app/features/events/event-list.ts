@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, model } from '@angular/core';
 import { EventCard } from './event-card';
 import { SearchBar } from './search-bar';
 
@@ -35,7 +35,7 @@ import { SearchBar } from './search-bar';
 export class EventList {
   readonly console = console;
   readonly alert = alert;
-  readonly searchQuery = signal('');
+  readonly searchQuery = model('');
 
   // TODO Mod 2: Inject Service and use resource()
 }
