@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, input, linkedSignal } from '@angular/core';
 
 @Component({
   selector: 'app-event-card',
@@ -7,6 +7,13 @@ import { Component } from '@angular/core';
       class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
     >
       <!-- TODO: Add Image -->
+      <div class="relative h-48 w-full bg-gray-200">
+        <img
+          [src]="image()"
+          class="object-cover w-full h-full max-h-full max-w-full"
+          alt="Event thumbnail"
+        />
+      </div>
 
       <div class="p-6">
         <div class="flex justify-between items-center mt-4">
@@ -14,18 +21,34 @@ import { Component } from '@angular/core';
           <p class="text-sm text-blue-600 font-semibold mb-2">TBA</p>
 
           <!-- TODO Mod 1: Add daysUntil() using @let -->
-          <div
-            class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm"
-          ></div>
+          @let days = daysUntil();
+          @if (days != null) {
+            <div
+              class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm"
+            >
+              @if (days > 0) {
+                In {{ days }} Days
+              } @else if (days < 0) {
+                Past event
+              } @else {
+                Happening Now!
+              }
+            </div>
+          }
         </div>
 
         <!-- TODO Mod 1: Add Title Input -->
-        <h3 class="text-xl font-bold text-gray-800 my-2">Title Placeholder</h3>
+        <h3 class="text-xl font-bold text-gray-800 my-2">{{ title() }}</h3>
 
         <div class="flex justify-between items-center mt-4">
           <!-- TODO Mod 1: Add Derived State (Like Button) -->
-          <button class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
-            ♡ Like
+          <button
+            (click)="toggleFavorite()"
+            [class.text-red-500]="isFavorite()"
+            [attr.data-foo]="isFavorite() ? 'test' : null"
+            class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+          >
+            {{ isFavorite() ? '♥' : '♡' }}
           </button>
 
           <!-- TODO Mod 1: Add Output -->
@@ -41,4 +64,28 @@ import { Component } from '@angular/core';
 })
 export class EventCard {
   // TODO Mod 1: Implement input(), output(), and model()
+  readonly title = input.required<string>();
+  readonly image = input.required<string>();
+  readonly date = input<string>();
+  initialLike = input(false);
+
+  isFavorite = linkedSignal(() => this.initialLike());
+
+  daysUntil = computed(() => {
+    const eventDate = this.date();
+    if (!eventDate) return null;
+
+    const today = new Date();
+    const target = new Date(eventDate);
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+
+    const diffTime = target.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / millisecondsPerDay);
+
+    return diffDays;
+  });
+
+  toggleFavorite() {
+    this.isFavorite.update((val) => !val);
+  }
 }
