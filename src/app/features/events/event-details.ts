@@ -1,11 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, inject, input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EventsService } from '../../core/event.service';
 
 @Component({
   selector: 'app-event-details',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   template: `
     <div class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
       <!-- Back Button -->
