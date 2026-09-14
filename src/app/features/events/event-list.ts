@@ -1,4 +1,5 @@
-import { Component, model } from '@angular/core';
+import { Component, inject, model } from '@angular/core';
+import { EventsService } from '../../core/event.service';
 import { EventCard } from './event-card';
 import { SearchBar } from './search-bar';
 
@@ -13,29 +14,45 @@ import { SearchBar } from './search-bar';
     </div>
 
     <!-- TODO Mod 2: Wrap in @if (events.isLoading()) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- TODO Mod 2: Use @for to iterate over resource -->
 
-      <!-- Static Placeholders for initial verify -->
-      <app-event-card
-        title="Angular Keynote"
-        image="/images/angular-keynote.png"
-        date="2026-12-10T09:00:00.000Z"
-        (delete)="console.log('Delete clicked'); alert('Delete clicked')"
-      />
-      <app-event-card
-        title="Signals Deep Dive"
-        image="/images/signals-deep-dive.png"
-        (delete)="console.log('Delete clicked'); alert('Delete clicked')"
-      />
-      <!-- <app-event-card /> -->
-    </div>
+    <!-- src/app/features/events/event-list.ts -->
+    <!-- 1. Error State -->
+    @if (events.error()) {
+      <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6">
+        Failed to load events. Is the server running?
+      </div>
+    }
+
+    <!-- 2. Loading State -->
+    @if (events.isLoading()) {
+      <div class="text-center py-12 text-gray-500 animate-pulse">Loading events...</div>
+    }
+
+    <!-- 3. Data State -->
+    <!-- We guard the value access with hasValue() -->
+    @if (events.hasValue()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (event of events.value(); track event.id) {
+          <app-event-card
+            [title]="event.title"
+            [image]="event.image"
+            [date]="event.date"
+            (delete)="console.log('Delete clicked'); alert('Delete clicked')"
+          />
+        } @empty {
+          <p>No events</p>
+        }
+      </div>
+    }
   `,
 })
 export class EventList {
+  readonly eventsService = inject(EventsService);
   readonly console = console;
   readonly alert = alert;
   readonly searchQuery = model('');
+
+  readonly events = this.eventsService.getEventsResource(this.searchQuery);
 
   // TODO Mod 2: Inject Service and use resource()
 }
