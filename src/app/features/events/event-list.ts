@@ -37,7 +37,7 @@ import { SearchBar } from './search-bar';
             [title]="event.title"
             [image]="event.image"
             [date]="event.date"
-            (delete)="console.log('Delete clicked'); alert('Delete clicked')"
+            (delete)="deleteEvent(event.id)"
           />
         } @empty {
           <p>No events</p>
@@ -53,6 +53,18 @@ export class EventList {
   readonly searchQuery = model('');
 
   readonly events = this.eventsService.getEventsResource(this.searchQuery);
+
+  deleteEvent(id: string) {
+    this.eventsService.deleteEvent(id).subscribe({
+      next: () => {
+        this.events.reload();
+      },
+      error: (err) => {
+        this.console.error('Delete', err);
+        this.alert('Could not delete');
+      },
+    });
+  }
 
   // TODO Mod 2: Inject Service and use resource()
 }
