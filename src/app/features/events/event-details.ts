@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { EventsService } from '../../core/event.service';
 
 @Component({
   selector: 'app-event-details',
@@ -30,4 +32,15 @@ import { Component } from '@angular/core';
 })
 export class EventDetails {
   // TODO Mod 3: id = input<string>()
+  activeRoute = inject(ActivatedRoute);
+
+  // Instead doing conversion of Rx.js to signal
+  // id = toSignal(this.activeRoute.paramMap)()?.get('id');
+  // we use `withComponentInputBinding()` in provideRouter, see @app.config.ts:11
+  // and then can use, so the URL http://localhost:4200/event/1 --> becomes
+  readonly id = input.required<string>();
+
+  readonly eventService = inject(EventsService);
+
+  readonly eventResouce = this.eventService.getEventResource(this.id);
 }
