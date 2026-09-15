@@ -1,5 +1,5 @@
 import { Component, effect, signal } from '@angular/core';
-import { FormField, debounce, disabled, form, required } from '@angular/forms/signals';
+import { FormField, debounce, disabled, form, minLength, required } from '@angular/forms/signals';
 import { DevFestEvent } from '../../models/event.model';
 
 interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
@@ -72,5 +72,9 @@ export class CreateEvent {
     // B. Conditional Disable: Disable description if Title is empty
     // valueOf() lets us look up the current value of other fields
     disabled(root.description, ({ valueOf }) => !valueOf(root.title));
+
+    // C. Validation
+    required(root.description, { message: 'Description is required' });
+    minLength(root.description, 10, { message: 'Description must be at least 10 chars' });
   });
 }
