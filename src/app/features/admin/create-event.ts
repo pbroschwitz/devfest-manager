@@ -1,5 +1,5 @@
 import { Component, effect, signal } from '@angular/core';
-import { FormField, form, required } from '@angular/forms/signals';
+import { FormField, debounce, form, required } from '@angular/forms/signals';
 import { DevFestEvent } from '../../models/event.model';
 
 interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
@@ -64,5 +64,9 @@ export class CreateEvent {
 
   readonly form = form(this.eventData, (root) => {
     required(root.title, { message: 'Title is required' });
+
+    // Description Rules
+    // A. Debounce: Wait 1000ms after typing stops before updating the model
+    debounce(root.description, 1000);
   });
 }
