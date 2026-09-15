@@ -1,5 +1,5 @@
 import { Component, effect, signal } from '@angular/core';
-import { FormField, debounce, form, required } from '@angular/forms/signals';
+import { FormField, debounce, disabled, form, required } from '@angular/forms/signals';
 import { DevFestEvent } from '../../models/event.model';
 
 interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
@@ -68,5 +68,9 @@ export class CreateEvent {
     // Description Rules
     // A. Debounce: Wait 1000ms after typing stops before updating the model
     debounce(root.description, 1000);
+
+    // B. Conditional Disable: Disable description if Title is empty
+    // valueOf() lets us look up the current value of other fields
+    disabled(root.description, ({ valueOf }) => !valueOf(root.title));
   });
 }
