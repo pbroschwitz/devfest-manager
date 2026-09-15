@@ -1,5 +1,5 @@
 import { Component, effect, signal } from '@angular/core';
-import { FormField, debounce, disabled, form, minLength, required } from '@angular/forms/signals';
+import { debounce, disabled, form, FormField, minLength, required } from '@angular/forms/signals';
 import { DevFestEvent } from '../../models/event.model';
 
 interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
@@ -11,34 +11,70 @@ interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow">
       <h2 class="text-2xl font-bold mb-6 text-gray-800">Create New Event</h2>
 
-      <!-- TODO Mod 4: Bind [group] -->
-      <form class="space-y-6">
+      <form (submit)="onSubmit($event)" class="space-y-6">
+        <!-- Title -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
-          <!-- TODO Mod 4: Bind [control] -->
+
+          <!-- BINDING: Use [FormField] pointing to the form tree property -->
           <input
             [formField]="form.title"
             type="text"
             class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
             placeholder="e.g. Angular Workshop"
           />
+
+          <!-- ERROR HANDLING: Check touched() AND invalid() signals -->
           @if (form.title().touched() && form.title().invalid()) {
-            <p class="text-red-500 text-sm">{{ form.title().errors()[0].message }}</p>
+            <p class="text-red-500 text-sm mt-1">{{ form.title().errors()[0].message }}</p>
           }
         </div>
 
+        <!-- Description -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-          <input type="datetime-local" class="w-full px-4 py-2 border rounded-md" />
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            [formField]="form.description"
+            rows="3"
+            class="w-full px-4 py-2 border rounded-md outline-none"
+          ></textarea>
+
+          @if (form.description().touched() && form.description().invalid()) {
+            <p class="text-red-500 text-sm mt-1">{{ form.description().errors()[0].message }}</p>
+          }
         </div>
 
-        <!-- TODO Mod 4: Dynamic Speaker Array -->
+        <!-- Date & Location -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label>Date</label>
+            <input
+              [formField]="form.date"
+              type="datetime-local"
+              class="w-full px-4 py-2 border rounded-md"
+            />
+          </div>
+          <div>
+            <label>Location</label>
+            <input
+              [formField]="form.location"
+              type="text"
+              class="w-full px-4 py-2 border rounded-md"
+            />
+          </div>
+        </div>
 
+        <!-- (Speakers Array Next) -->
+
+        <!-- Actions -->
         <div class="flex justify-end gap-4 pt-4">
-          <button type="button" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+          <button type="button" class="px-4 py-2 text-gray-600">Cancel</button>
+
+          <!-- Form-Level Validity: form().invalid() -->
           <button
             type="submit"
-            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            [disabled]="form().invalid()"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
           >
             Create Event
           </button>
@@ -81,4 +117,14 @@ export class CreateEvent {
     required(root.date, { message: 'Date is required' });
     required(root.location, { message: 'Location is required' });
   });
+
+  onSubmit(event: Event): void {
+    event.preventDefault();
+
+    if (this.form().invalid()) {
+      return;
+    }
+
+    console.log('Submitting event:', this.form().value());
+  }
 }
