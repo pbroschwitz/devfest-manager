@@ -76,5 +76,9 @@ export class CreateEvent {
     // C. Validation
     required(root.description, { message: 'Description is required' });
     minLength(root.description, 10, { message: 'Description must be at least 10 chars' });
+
+    // Other Rules
+    required(root.date, { message: 'Date is required' });
+    required(root.location, { message: 'Location is required' });
   });
 }
