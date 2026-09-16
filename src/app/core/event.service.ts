@@ -1,5 +1,5 @@
 import { HttpClient, httpResource } from '@angular/common/http';
-import { inject, Injectable, signal, Signal } from '@angular/core';
+import { computed, inject, Injectable, signal, Signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import { DevFestEvent } from '../models/event.model';
 
@@ -9,7 +9,9 @@ import { DevFestEvent } from '../models/event.model';
 export class EventsService {
   private apiUrl = 'http://localhost:3000/events';
   private readonly http = inject(HttpClient);
-  readonly isCreating = signal(false);
+  readonly isCreatingInternal = signal(false);
+
+  readonly isCreating = computed(() => this.isCreatingInternal());
 
   getEventsResource(query: Signal<string>) {
     // const q = query();  // <-- (1) this will not work !! Must be in the body of the callback !!
@@ -31,10 +33,10 @@ export class EventsService {
   }
 
   createEvent(event: Omit<DevFestEvent, 'id'>) {
-    this.isCreating.set(true);
+    this.isCreatingInternal.set(true);
     return this.http.post<DevFestEvent>(this.apiUrl, event).pipe(
       finalize(() => {
-        this.isCreating.set(false);
+        this.isCreatingInternal.set(false);
       }),
     );
   }
