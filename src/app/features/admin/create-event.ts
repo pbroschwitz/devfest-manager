@@ -1,5 +1,7 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { debounce, disabled, form, FormField, minLength, required } from '@angular/forms/signals';
+import { Router } from '@angular/router';
+import { EventsService } from '../../core/event.service';
 import { DevFestEvent } from '../../models/event.model';
 
 interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
@@ -65,6 +67,37 @@ interface CreateEventForm extends Omit<DevFestEvent, 'id'> {}
         </div>
 
         <!-- (Speakers Array Next) -->
+        <div class="border-t border-gray-100 pt-4">
+          <div class="flex justify-between items-center mb-2">
+            <label class="block text-sm font-medium text-gray-700">Speakers</label>
+            <button
+              type="button"
+              (click)="addSpeaker()"
+              class="text-sm text-blue-600 hover:underline"
+            >
+              + Add Speaker
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <!-- Iterate over the SOURCE data to get the index -->
+            @for (speaker of eventData().speakers; track $index) {
+              <div class="flex gap-2">
+                <!-- Bind to form.speakers[index] -->
+                <input
+                  [formField]="form.speakers[$index]"
+                  type="text"
+                  placeholder="Speaker Name"
+                  class="flex-1 px-4 py-2 border rounded-md"
+                />
+
+                <button type="button" (click)="removeSpeaker($index)" class="text-red-500 px-2">
+                  ✕
+                </button>
+              </div>
+            }
+          </div>
+        </div>
 
         <!-- Actions -->
         <div class="flex justify-end gap-4 pt-4">
@@ -89,13 +122,16 @@ export class CreateEvent {
     effect(() => console.log('title:', this.eventData().title));
   }
 
+  readonly eventsService = inject(EventsService);
+  readonly router = inject(Router);
+
   readonly eventData = signal<CreateEventForm>({
     title: '',
     description: '',
     date: new Date().toISOString().slice(0, 16),
     location: '',
     speakers: [],
-    image: '/image/event4.png',
+    image: '/images/event4.png',
   });
 
   readonly form = form(this.eventData, (root) => {
@@ -118,12 +154,37 @@ export class CreateEvent {
     required(root.location, { message: 'Location is required' });
   });
 
+  addSpeaker() {
+    // Update the source signal. The form automatically detects the new item.
+    this.eventData.update((current) => ({
+      ...current,
+      speakers: [...current.speakers, ''],
+    }));
+  }
+
+  removeSpeaker(index: number) {
+    this.eventData.update((current) => ({
+      ...current,
+      speakers: current.speakers.filter((_, i) => i !== index),
+    }));
+  }
+
   onSubmit(event: Event): void {
     event.preventDefault();
 
     if (this.form().invalid()) {
       return;
     }
+
+    const payload = this.eventData();
+
+    this.eventsService.createEvent(payload).subscribe({
+      next: () => {
+        alert('Event created successfully');
+        this.router.navigate(['/']);
+      },
+      error: (e) => console.error(e),
+    });
 
     console.log('Submitting event:', this.form().value());
   }
